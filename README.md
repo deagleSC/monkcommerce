@@ -1,6 +1,8 @@
 # monkcommerce
 Products catalog service &amp; catalog sync service.
 
+Hosted Backend URL: https://monkcommerce-backend.onrender.com
+
 ### Clone the repository
 ```
 git clone https://github.com/deagleSC/monkcommerce.git

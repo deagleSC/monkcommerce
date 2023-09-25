@@ -3,6 +3,9 @@ import Product from "../models/Product.js";
 import axios from "axios";
 
 const syncCategories = async () => {
+  let pageCount = 1
+  
+  while (true) {
     const categoriesResponse = await axios.get(
         'https://stageapi.monkcommerce.app/task/categories',
         {
@@ -10,11 +13,13 @@ const syncCategories = async () => {
             'x-api-key': process.env.STAGE_API_KEY, // Replace with your API key
           },
           params: {
-            page: 1, 
+            page: pageCount, 
             limit: 100
           }
         }
     );
+
+    if (!categoriesResponse.data.categories) return null
 
     let categories = (categoriesResponse.data.categories).map((c) => {return {...c, categoryID: c.id}})
     let existingCategories = (await Category.find()).map((c) => c.categoryID)
@@ -36,6 +41,7 @@ const syncCategories = async () => {
     await Category.bulkWrite(categoriesToUpdate)
 
     return categories
+  }
 }
 
 const syncProduct = async (categoryID) => {
@@ -55,16 +61,11 @@ const syncProduct = async (categoryID) => {
       );
 
     let products = productsResponse.data.products;
-    let existingProducts = (await Product.find({category: categoryID})).map((p) => p.name)
-
     if (!products) return null
 
     products = products.map((p) => {return {...p, category: categoryID}})
-    
-    let productsToInsert = products.filter((product) => !existingProducts.includes(product.name))
-    // let productsToUpdate = products.filter((product) => existingProducts.includes(product.name)) 
 
-    await Product.insertMany(productsToInsert)
+    await Product.insertMany(products)
 
     let category = await Category.find({categoryID: categoryID})
     let categoryProducts = (await Product.find({category: categoryID})).map((p) => p._id.toString())
@@ -79,15 +80,16 @@ const syncProduct = async (categoryID) => {
 }
 
 export const syncController = async (req, res, next) => {
-    try {
-        const categories = await syncCategories()
-
+  try {
+      const categories = await syncCategories()
+      if (categories) {
         for (const category of categories) {
             const products = await syncProduct(category.categoryID)
         }
+      }
 
-        return res.status(200).json("Synced succesfully!")
-    } catch (error) {
-        res.status(500).json({"Error": error.message})
-    }
+      return res.status(200).json("Synced succesfully!")
+  } catch (error) {
+      res.status(500).json({"Error": error.message})
+  }
 }

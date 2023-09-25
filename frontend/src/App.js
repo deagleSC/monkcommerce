@@ -9,6 +9,8 @@ const App = () => {
   return (
     <div className="app">
 
+      <p>Note: This Page may take a while to load, since Render free tier services go to sleep after 15 minnutes of inactivity.</p>
+
       <BrowserRouter>
       <Routes>
       

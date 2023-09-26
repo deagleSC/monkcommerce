@@ -1,7 +1,8 @@
 # monkcommerce
 Products catalog service &amp; catalog sync service.
 
-Hosted Backend URL: https://monkcommerce-backend.onrender.com
+Hosted Backend URL: https://monkcommerce-backend.onrender.com <br>
+Hosted Frontend URL: https://monkcommerce.vercel.app/
 
 ### Clone the repository
 ```
